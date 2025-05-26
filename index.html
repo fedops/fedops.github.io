@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Report: Federated Learning Operations (FLOps)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices: 
+        - Report Info: Section 1 (Intro to FL, FLOps, Principles, Lifecycle). Goal: Inform, Organize. Viz/Presentation: Text, styled lists, HTML/CSS flow diagram for lifecycle. Interaction: Clickable lifecycle steps for details. Justification: Clear, structured presentation of foundational concepts. Library/Method: HTML, Tailwind, JS.
+        - Report Info: Section 2 (MLOps, FL characteristics, FLOps vs MLOps). Goal: Compare, Inform. Viz/Presentation: Text, HTML table for comparison. Interaction: None specific beyond navigation. Justification: Direct comparison is best for clarity. Library/Method: HTML, Tailwind.
+        - Report Info: Section 3 (Architecture, Data Mgmt, Training, Deployment, Monitoring). Goal: Explain, Organize. Viz/Presentation: Text, HTML/CSS block diagrams for architecture, lists for components. Interaction: Toggles for detailed descriptions. Justification: Visualizing architecture aids understanding. Library/Method: HTML, Tailwind, JS.
+        - Report Info: Section 4 (Challenges - Security, Communication, Heterogeneity, Quality, Governance). Goal: Detail, Organize. Viz/Presentation: Tabbed interface or accordions for challenge categories, HTML table for summary. Interaction: Tabs/accordions to switch views. Justification: Organizes extensive list of challenges and mitigations. Library/Method: HTML, Tailwind, JS.
+        - Report Info: Section 5 (Benefits). Goal: Inform, Highlight. Viz/Presentation: Card layout with icons (Unicode/CSS). Interaction: None specific. Justification: Visually appealing way to present key advantages. Library/Method: HTML, Tailwind.
+        - Report Info: Section 6 (Tools/Platforms). Goal: Inform, Compare. Viz/Presentation: Grid of cards, modal for platform details. Interaction: Clickable cards to open modals. Justification: Allows users to explore specific tools without cluttering the main page. Library/Method: HTML, Tailwind, JS.
+        - Report Info: Section 7 (Use Cases). Goal: Illustrate. Viz/Presentation: Tabbed interface for industries. Interaction: Tabs to switch views. Justification: Groups related examples. Library/Method: HTML, Tailwind, JS.
+        - Report Info: Section 8 (Best Practices). Goal: Guide. Viz/Presentation: Collapsible lists. Interaction: Toggles for list expansion. Justification: Concise presentation of actionable advice. Library/Method: HTML, Tailwind, JS.
+        - Report Info: Section 9 (Future Trends). Goal: Inform. Viz/Presentation: List/cards. Interaction: None specific. Justification: Summarizes forward-looking statements. Library/Method: HTML, Tailwind.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. Chart.js CDN is included but primary visualizations are HTML/CSS based.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+        }
+        .nav-link.active {
+            color: #0284c7; /* sky-600 */
+            border-bottom-color: #0284c7; /* sky-600 */
+        }
+        .nav-link:hover {
+            color: #0369a1; /* sky-700 */
+        }
+        .tab-button.active {
+            background-color: #0284c7; /* sky-600 */
+            color: white;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Example max-width */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 400px; /* Max height */
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px; /* Taller on md screens and up */
+            }
+        }
+        .modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+        .section-intro {
+            font-size: 1.125rem; /* text-lg */
+            line-height: 1.75rem; /* leading-relaxed */
+            color: #475569; /* slate-600 */
+            margin-bottom: 2rem; /* mb-8 */
+            max-width: 48rem; /* max-w-3xl */
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center">
+                    <span class="font-bold text-2xl text-sky-700">FLOps Explorer</span>
+                </div>
+                <nav class="hidden md:flex space-x-1">
+                    <a href="#overview" class="nav-link text-slate-600 hover:text-sky-700 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Overview</a>
+                    <a href="#context" class="nav-link text-slate-600 hover:text-sky-700 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Context</a>
+                    <a href="#architecture" class="nav-link text-slate-600 hover:text-sky-700 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Architecture</a>
+                    <a href="#challenges" class="nav-link text-slate-600 hover:text-sky-700 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Challenges</a>
+                    <a href="#benefits" class="nav-link text-slate-600 hover:text-sky-700 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Benefits</a>
+                    <a href="#tools" class="nav-link text-slate-600 hover:text-sky-700 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Tools</a>
+                    <a href="#usecases" class="nav-link text-slate-600 hover:text-sky-700 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Use Cases</a>
+                    <a href="#bestpractices" class="nav-link text-slate-600 hover:text-sky-700 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Practices</a>
+                    <a href="#future" class="nav-link text-slate-600 hover:text-sky-700 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Future</a>
+                </nav>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-slate-600 hover:text-sky-700 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden bg-white shadow-lg">
+            <a href="#overview" class="block nav-link text-slate-600 hover:text-sky-700 px-3 py-3 text-base font-medium border-b border-slate-100">Overview</a>
+            <a href="#context" class="block nav-link text-slate-600 hover:text-sky-700 px-3 py-3 text-base font-medium border-b border-slate-100">Context</a>
+            <a href="#architecture" class="block nav-link text-slate-600 hover:text-sky-700 px-3 py-3 text-base font-medium border-b border-slate-100">Architecture</a>
+            <a href="#challenges" class="block nav-link text-slate-600 hover:text-sky-700 px-3 py-3 text-base font-medium border-b border-slate-100">Challenges</a>
+            <a href="#benefits" class="block nav-link text-slate-600 hover:text-sky-700 px-3 py-3 text-base font-medium border-b border-slate-100">Benefits</a>
+            <a href="#tools" class="block nav-link text-slate-600 hover:text-sky-700 px-3 py-3 text-base font-medium border-b border-slate-100">Tools</a>
+            <a href="#usecases" class="block nav-link text-slate-600 hover:text-sky-700 px-3 py-3 text-base font-medium border-b border-slate-100">Use Cases</a>
+            <a href="#bestpractices" class="block nav-link text-slate-600 hover:text-sky-700 px-3 py-3 text-base font-medium border-b border-slate-100">Practices</a>
+            <a href="#future" class="block nav-link text-slate-600 hover:text-sky-700 px-3 py-3 text-base font-medium">Future</a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="hero" class="py-16 md:py-24 text-center">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 mb-6">
+                Federated Learning Operations <span class="text-sky-600">(FLOps)</span>
+            </h1>
+            <p class="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
+                An interactive guide to understanding the discipline of operationalizing robust, scalable, and privacy-preserving AI on decentralized data.
+            </p>
+            <a href="#overview" class="bg-sky-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-sky-700 transition duration-300 text-lg">
+                Explore FLOps
+            </a>
+        </section>
+
+        <section id="overview" class="py-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">1. Overview of FLOps</h2>
+            <p class="section-intro">This section introduces the fundamental concepts of Federated Learning (FL) and Federated Learning Operations (FLOps). It explains what they are, their core principles, goals, and the typical lifecycle involved in operationalizing FL systems. Understanding these basics is key to appreciating the complexities and solutions discussed later.</p>
+            
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-semibold text-sky-700 mb-3">What is Federated Learning (FL)?</h3>
+                    <p class="text-slate-700 leading-relaxed mb-2">FL enables collaborative model training on decentralized data. Raw data stays localized on client devices or organizational boundaries.</p>
+                    <p class="text-slate-700 leading-relaxed mb-2">Clients exchange model parameters (weights, gradients) with a central server or peers, which are aggregated to improve a global model.</p>
+                    <p class="text-slate-700 leading-relaxed">This prioritizes data privacy, handles large data volumes, and addresses regulatory constraints. It's challenged by non-IID (statistically heterogeneous) data across clients.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-semibold text-sky-700 mb-3">What is FLOps?</h3>
+                    <p class="text-slate-700 leading-relaxed mb-2">FLOps (Federated Learning Operations) is the discipline for systematic development, deployment, and continuous management of FL systems in production.</p>
+                    <p class="text-slate-700 leading-relaxed mb-2">It adapts MLOps and DevOps principles for FL's unique constraints (decentralization, privacy, heterogeneity).</p>
+                    <p class="text-slate-700 leading-relaxed font-medium">Note: FLOps (Operations) is distinct from FLOPs (Floating-Point Operations Per Second - a computational metric).</p>
+                </div>
+            </div>
+
+            <div class="mt-12 bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="text-2xl font-semibold text-sky-700 mb-4 text-center">Core Principles & Goals of FLOps</h3>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="p-4 border border-sky-200 rounded-lg bg-sky-50">
+                        <h4 class="font-semibold text-slate-800 text-lg mb-1">Automation</h4>
+                        <p class="text-sm text-slate-600">Automate FL pipelines, deployment, containerization, and training/aggregation rounds.</p>
+                    </div>
+                    <div class="p-4 border border-sky-200 rounded-lg bg-sky-50">
+                        <h4 class="font-semibold text-slate-800 text-lg mb-1">Lifecycle Management</h4>
+                        <p class="text-sm text-slate-600">Manage the entire FL application lifecycle: design, data prep, training, aggregation, deployment, monitoring, iteration.</p>
+                    </div>
+                    <div class="p-4 border border-sky-200 rounded-lg bg-sky-50">
+                        <h4 class="font-semibold text-slate-800 text-lg mb-1">Scalability</h4>
+                        <p class="text-sm text-slate-600">Enable FL systems to scale to many clients (few organizations to millions of devices) and large datasets.</p>
+                    </div>
+                    <div class="p-4 border border-sky-200 rounded-lg bg-sky-50">
+                        <h4 class="font-semibold text-slate-800 text-lg mb-1">Reliability & Robustness</h4>
+                        <p class="text-sm text-slate-600">Ensure dependable operations, handling client dropouts, failures, and stragglers.</p>
+                    </div>
+                    <div class="p-4 border border-sky-200 rounded-lg bg-sky-50">
+                        <h4 class="font-semibold text-slate-800 text-lg mb-1">Flexibility & Abstraction</h4>
+                        <p class="text-sm text-slate-600">Support diverse FL scenarios, datasets, client infrastructures, and algorithms.</p>
+                    </div>
+                    <div class="p-4 border border-sky-200 rounded-lg bg-sky-50">
+                        <h4 class="font-semibold text-slate-800 text-lg mb-1">Reproducibility & Reusability</h4>
+                        <p class="text-sm text-slate-600">Ensure reproducible experiments and reusable components/workflows.</p>
+                    </div>
+                    <div class="p-4 border border-sky-200 rounded-lg bg-sky-50 sm:col-span-2 lg:col-span-3">
+                        <h4 class="font-semibold text-slate-800 text-lg mb-1">Privacy & Security in Operations</h4>
+                        <p class="text-sm text-slate-600">Uphold and enhance privacy/security throughout all operational aspects, including managing Privacy-Enhancing Technologies (PETs).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="text-2xl font-semibold text-sky-700 mb-6 text-center">The FLOps Lifecycle</h3>
+                <p class="text-slate-600 leading-relaxed mb-6 text-center max-w-2xl mx-auto">The FLOps lifecycle adapts MLOps for FL's distributed nature. Click on each stage to learn more (conceptual details).</p>
+                <div id="flops-lifecycle-container" class="flex flex-col sm:flex-row flex-wrap justify-center items-stretch gap-4">
+                    </div>
+            </div>
+        </section>
+
+        <section id="context" class="py-16 scroll-mt-20 bg-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">2. FLOps in Context</h2>
+                <p class="section-intro">This section places FLOps within the broader landscape of machine learning operations. It explores its relationship with MLOps and Federated Learning, highlighting overlaps and crucial distinctions that necessitate FLOps as a specialized discipline.</p>
+
+                <div class="grid md:grid-cols-3 gap-8 mb-12">
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold text-sky-700 mb-2">MLOps Refresher</h3>
+                        <p class="text-sm text-slate-600">Streamlines the ML lifecycle (dev, train, deploy, monitor, maintain) for robust, scalable production models. Principles: CI/CD, orchestration, reproducibility, versioning, collaboration, continuous training/monitoring.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold text-sky-700 mb-2">FL Characteristics Revisited</h3>
+                        <p class="text-sm text-slate-600">Data localization, collaborative training via parameter exchange, handling system/statistical heterogeneity, iterative process of local training and global aggregation.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold text-sky-700 mb-2">FLOps: An Extension of MLOps</h3>
+                        <p class="text-sm text-slate-600">Applies MLOps principles to FL's distributed, private, heterogeneous context. Key distinctions: decentralized ops, privacy-preserving ops (PETs), federated orchestration, heterogeneity management, communication efficiency focus, multi-party governance.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
+                    <h3 class="text-2xl font-semibold text-sky-700 mb-4 text-center">FLOps vs. MLOps vs. Federated Learning</h3>
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Characteristic</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Federated Learning (FL)</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">MLOps (General)</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">FLOps</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200 text-sm">
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-slate-800">Primary Goal</td>
+                                <td class="px-4 py-3 text-slate-600">Collaborative model training with data privacy.</td>
+                                <td class="px-4 py-3 text-slate-600">Streamline ML lifecycle, deploy robust & scalable models centrally.</td>
+                                <td class="px-4 py-3 text-slate-600">Operationalize FL efficiently, continuously, and at scale.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-slate-800">Data Handling</td>
+                                <td class="px-4 py-3 text-slate-600">Decentralized, localized at client sites/devices.</td>
+                                <td class="px-4 py-3 text-slate-600">Typically centralized for operational processes.</td>
+                                <td class="px-4 py-3 text-slate-600">Manages decentralized data, ensuring privacy in operations.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-slate-800">Training Environment</td>
+                                <td class="px-4 py-3 text-slate-600">Distributed across multiple clients/nodes.</td>
+                                <td class="px-4 py-3 text-slate-600">Centralized or managed cloud environments.</td>
+                                <td class="px-4 py-3 text-slate-600">Distributed, heterogeneous FL systems.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-slate-800">Key Operational Focus</td>
+                                <td class="px-4 py-3 text-slate-600">N/A (Learning paradigm).</td>
+                                <td class="px-4 py-3 text-slate-600">Automation, CI/CD, monitoring for centralized systems.</td>
+                                <td class="px-4 py-3 text-slate-600">FL lifecycle mgmt, federated orchestration, privacy in ops, heterogeneity mgmt.</td>
+                            </tr>
+                             <tr>
+                                <td class="px-4 py-3 font-medium text-slate-800">Core Challenges Addressed</td>
+                                <td class="px-4 py-3 text-slate-600">Data privacy, data silos, communication constraints (algorithmic).</td>
+                                <td class="px-4 py-3 text-slate-600">Model decay, deployment bottlenecks, scalability of centralized ML.</td>
+                                <td class="px-4 py-3 text-slate-600">FL-specific operational complexities: distributed coordination, secure aggregation, managing diverse clients.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture" class="py-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">3. Architecture & Key Components</h2>
+            <p class="section-intro">This section delves into the typical architecture of FLOps systems and their key components. It covers how these systems are structured to manage distributed data, orchestrate training, handle model deployment, and ensure continuous monitoring in a federated environment.</p>
+
+            <div class="bg-white p-6 rounded-xl shadow-lg mb-12">
+                <h3 class="text-2xl font-semibold text-sky-700 mb-4 text-center">Typical FLOps System Architecture</h3>
+                <p class="text-slate-600 leading-relaxed mb-4">FLOps systems usually feature a central orchestrator/server coordinating distributed clients. Architectures are layered. Examples include:</p>
+                <div class="grid md:grid-cols-2 gap-6 mb-4">
+                    <div class="border border-sky-200 p-4 rounded-lg bg-sky-50">
+                        <h4 class="font-semibold text-slate-800">CWL-FLOps:</h4>
+                        <ul class="list-disc list-inside text-sm text-slate-600 space-y-1">
+                            <li>FL Topology Configuration (CWL)</li>
+                            <li>Cloud Infrastructure Setup (Terraform)</li>
+                            <li>Client/Aggregator Code Management (GitHub, Docker, CI/CD)</li>
+                        </ul>
+                    </div>
+                    <div class="border border-sky-200 p-4 rounded-lg bg-sky-50">
+                        <h4 class="font-semibold text-slate-800">FL-APU (Cross-Silo):</h4>
+                         <ul class="list-disc list-inside text-sm text-slate-600 space-y-1">
+                            <li>FL Server (Central Coordinator)</li>
+                            <li>FL Client (Per Organization/Silo)</li>
+                            <li>Management Website on FL Client (Admin, Monitoring, API)</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="text-slate-600 leading-relaxed text-sm text-center">Common pattern: Central coordination, distributed execution, defined workflows, modular components leveraging existing tech.</p>
+                 <div class="mt-6 p-4 border-2 border-dashed border-slate-300 rounded-lg">
+                    <h4 class="text-lg font-semibold text-slate-700 mb-2 text-center">Conceptual Architecture Diagram</h4>
+                    <div class="flex flex-col items-center space-y-3 text-sm">
+                        <div class="bg-sky-100 text-sky-800 p-3 rounded-md shadow w-full max-w-md text-center font-medium">Central Orchestrator / Server</div>
+                        <div class="text-3xl text-slate-400">↕</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl">
+                            <div class="bg-slate-100 text-slate-700 p-3 rounded-md shadow text-center">Client 1 (Device/Silo)<br/>(Local Data + Local Training)</div>
+                            <div class="bg-slate-100 text-slate-700 p-3 rounded-md shadow text-center">Client 2 (Device/Silo)<br/>(Local Data + Local Training)</div>
+                            <div class="bg-slate-100 text-slate-700 p-3 rounded-md shadow text-center">Client N (Device/Silo)<br/>(Local Data + Local Training)</div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">Arrows indicate model/parameter exchange, not raw data.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="architecture-tabs" class="mb-8 flex flex-wrap justify-center gap-2">
+                <button data-tab="data-management" class="tab-button bg-slate-200 text-slate-700 px-4 py-2 rounded-md hover:bg-sky-500 hover:text-white transition active">Data Management</button>
+                <button data-tab="training-orchestration" class="tab-button bg-slate-200 text-slate-700 px-4 py-2 rounded-md hover:bg-sky-500 hover:text-white transition">Training Orchestration</button>
+                <button data-tab="model-deployment" class="tab-button bg-slate-200 text-slate-700 px-4 py-2 rounded-md hover:bg-sky-500 hover:text-white transition">Model Deployment</button>
+                <button data-tab="monitoring-observability" class="tab-button bg-slate-200 text-slate-700 px-4 py-2 rounded-md hover:bg-sky-500 hover:text-white transition">Monitoring</button>
+            </div>
+
+            <div id="architecture-content-area">
+                <div id="data-management-content" class="tab-content bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-semibold text-sky-700 mb-3">Data Management in Federated Settings</h3>
+                    <ul class="list-disc list-inside space-y-2 text-slate-700 leading-relaxed">
+                        <li><strong>Decentralized Storage:</strong> Raw data remains localized; never exchanged.</li>
+                        <li><strong>Handling Non-IID Data:</strong> Addresses varied data distributions, quantities, and quality across clients.</li>
+                        <li><strong>Data Partitioning:</strong> Manages inherently partitioned data, possibly using privacy-preserving metadata.</li>
+                        <li><strong>Quality & Preprocessing:</strong> Standardizes quality/preprocessing across diverse, decentralized sources.</li>
+                        <li><strong>Access Control & Security:</strong> Manages permissions and secures data at each client node.</li>
+                        <li><strong>Provenance & Lineage:</strong> Tracks data/model lineage for auditability (e.g., FATE).</li>
+                    </ul>
+                </div>
+                <div id="training-orchestration-content" class="tab-content bg-white p-6 rounded-xl shadow-lg hidden">
+                    <h3 class="text-xl font-semibold text-sky-700 mb-3">Model Training Orchestration</h3>
+                    <ul class="list-disc list-inside space-y-2 text-slate-700 leading-relaxed">
+                        <li><strong>Collaborative & Iterative:</strong> Manages rounds of global model distribution, local training, and secure aggregation.</li>
+                        <li><strong>Initialization:</strong> Starts with a global model, distributed to clients.</li>
+                        <li><strong>Client Selection:</strong> Chooses clients per round (random or strategic).</li>
+                        <li><strong>Model Distribution:</strong> Securely sends current global model to selected clients.</li>
+                        <li><strong>Local Training:</strong> Clients train model on local data (configurable specifics).</li>
+                        <li><strong>Model Update Transmission:</strong> Clients send updates (weights/gradients), not raw data.</li>
+                        <li><strong>Secure Aggregation:</strong> Server aggregates updates (using SMPC, HE, DP).</li>
+                        <li><strong>Iteration & Convergence:</strong> Repeats until desired performance or criteria met.</li>
+                        <li><strong>Workflow Tools:</strong> Uses tools like CWL-FLOps, FATE-Flow for pipeline management.</li>
+                        <li><strong>Managing Heterogeneity:</strong> Adapts to system/statistical variations (e.g., FedMSA).</li>
+                    </ul>
+                </div>
+                <div id="model-deployment-content" class="tab-content bg-white p-6 rounded-xl shadow-lg hidden">
+                    <h3 class="text-xl font-semibold text-sky-700 mb-3">Model Deployment Strategies</h3>
+                    <ul class="list-disc list-inside space-y-2 text-slate-700 leading-relaxed">
+                        <li><strong>Targets:</strong> Global model to central server or back to clients for local inference/personalization.</li>
+                        <li><strong>Cross-Device vs. Cross-Silo:</strong> Different needs for massive devices vs. fewer organizational silos.</li>
+                        <li><strong>Continuous Deployment (CI/CD/CT):</strong> Automates build, validation, deployment of new model versions.</li>
+                        <li><strong>Heterogeneity:</strong> Deploys to diverse hardware/software (e.g., FedMSA, TensorOpera Deploy).</li>
+                        <li><strong>Versioning:</strong> Manages global and personalized model versions.</li>
+                        <li><strong>Adaptation of MLOps Strategies:</strong> Shadow deployment, canary releases, blue-green (adapted for FL).</li>
+                    </ul>
+                </div>
+                <div id="monitoring-observability-content" class="tab-content bg-white p-6 rounded-xl shadow-lg hidden">
+                    <h3 class="text-xl font-semibold text-sky-700 mb-3">Monitoring and Observability</h3>
+                    <ul class="list-disc list-inside space-y-2 text-slate-700 leading-relaxed">
+                        <li><strong>Performance Monitoring:</strong> Tracks global/local model metrics (accuracy, loss, fairness).</li>
+                        <li><strong>System Health:</strong> Monitors server/client resource utilization, operational status (e.g., NVIDIA FLARE, TensorOpera AI).</li>
+                        <li><strong>Data & Concept Drift:</strong> Detects changes in client data distributions or input-target relationships (e.g., FLAME).</li>
+                        <li><strong>Communication Monitoring:</strong> Tracks bandwidth, latency to identify bottlenecks.</li>
+                        <li><strong>Security & Privacy:</strong> Monitors for vulnerabilities, attacks, compliance.</li>
+                        <li><strong>Logging & Alerting:</strong> Comprehensive, distributed logging and critical event alerts.</li>
+                        <li><strong>Client-Side Observability:</strong> Gathers aggregated, anonymized local performance/health.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="py-16 scroll-mt-20 bg-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">4. Core Challenges in FLOps</h2>
+                <p class="section-intro">Implementing and managing FLOps pipelines comes with significant hurdles. This section details the core challenges related to security and privacy, communication efficiency, system and data heterogeneity, model quality, and governance in multi-party setups. Understanding these challenges is key to developing effective mitigation strategies.</p>
+                
+                <div id="challenges-accordion-container">
+                    </div>
+
+                <div class="mt-12 bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
+                    <h3 class="text-2xl font-semibold text-sky-700 mb-4 text-center">Summary: Challenges & Mitigation Strategies</h3>
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Challenge Area</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Specific Challenge Example</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Mitigation Example</th>
+                            </tr>
+                        </thead>
+                        <tbody id="challenges-table-body" class="bg-white divide-y divide-slate-200 text-sm">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="benefits" class="py-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">5. Benefits of Adopting FLOps</h2>
+            <p class="section-intro">Adopting FLOps offers substantial advantages by enabling practical and scalable Federated Learning. This section highlights key benefits, including improved model performance from diverse data, enhanced operational data privacy and security, facilitated regulatory compliance, and better operational efficiency and scalability of FL systems.</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3 text-sky-600">📈</span>
+                        <h3 class="text-xl font-semibold text-sky-700">Improved Model Performance</h3>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">Access to diverse, decentralized data leads to more robust, generalizable models. FLOps helps manage non-IID data and enables continuous learning.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3 text-sky-600">🛡️</span>
+                        <h3 class="text-xl font-semibold text-sky-700">Enhanced Data Privacy & Security</h3>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">Reinforces data localization and operationalizes PETs (DP, HE, SMPC), TEEs, and secure infrastructure throughout the lifecycle.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3 text-sky-600">📜</span>
+                        <h3 class="text-xl font-semibold text-sky-700">Facilitating Regulatory Compliance</h3>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">Supports data localization (GDPR, HIPAA), enables auditability/traceability, and helps implement standardized frameworks.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3 text-sky-600">⚙️</span>
+                        <h3 class="text-xl font-semibold text-sky-700">Improved Operational Efficiency & Scalability</h3>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">Automates FL lifecycle, optimizes resource use, enhances scalability to many clients, and reduces bandwidth needs.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="tools" class="py-16 scroll-mt-20 bg-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">6. Tools, Platforms & Frameworks</h2>
+                <p class="section-intro">A growing ecosystem of tools and platforms is crucial for operationalizing Federated Learning. This section provides an overview of the FLOps tooling landscape and offers a closer look at key platforms, highlighting their features and strengths in managing the FL lifecycle.</p>
+                <p class="text-slate-600 leading-relaxed mb-8 text-center">The landscape includes open-source frameworks and commercial platforms focusing on orchestration, client/model management, security, monitoring, and workflow automation. Click on a platform to see more details.</p>
+                <div id="tools-platform-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    </div>
+            </div>
+        </section>
+
+        <section id="usecases" class="py-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">7. Real-World Use Cases</h2>
+            <p class="section-intro">FLOps is enabling practical FL applications across various industries. This section explores real-world use cases in cross-silo collaborations, healthcare, finance, and IoT/Edge AI, demonstrating how FLOps helps deploy these privacy-preserving AI solutions effectively.</p>
+            <div id="usecases-tabs-buttons" class="mb-8 flex flex-wrap justify-center gap-2">
+                </div>
+            <div id="usecases-tabs-content" class="bg-white p-6 rounded-xl shadow-lg min-h-[300px]">
+                </div>
+        </section>
+
+        <section id="bestpractices" class="py-16 scroll-mt-20 bg-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">8. Best Practices for FLOps Pipelines</h2>
+                <p class="section-intro">Developing robust and scalable FLOps pipelines requires a blend of general data engineering best practices and FL-specific techniques. This section outlines key practices for designing, implementing, and maintaining effective FLOps pipelines to ensure they are efficient, secure, and maintainable.</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold text-sky-700 mb-3">General Data Pipeline Best Practices</h3>
+                        <ul id="general-best-practices-list" class="space-y-3">
+                           </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold text-sky-700 mb-3">FL-Specific Pipeline Practices</h3>
+                         <ul id="fl-specific-practices-list" class="space-y-3">
+                            </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="py-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">9. Future Trends & Research</h2>
+            <p class="section-intro">The field of FLOps is dynamic and rapidly evolving. This section touches upon key future trends and research directions aimed at further enhancing the efficiency, scalability, security, and applicability of Federated Learning systems, especially with the rise of large-scale models.</p>
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="text-xl font-semibold text-sky-700 mb-3">Key Directions:</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-700 leading-relaxed">
+                    <li><strong>Enhancing Efficiency & Scalability:</strong>
+                        <ul class="list-circle list-inside ml-4 text-sm space-y-1">
+                            <li>Advanced model compression and update sparsification (e.g., FedSZ).</li>
+                            <li>One-shot and few-shot FL to reduce communication rounds.</li>
+                            <li>Refinement of asynchronous and hierarchical FL protocols for better straggler handling and scalability.</li>
+                        </ul>
+                    </li>
+                    <li class="mt-2"><em>(Further research areas include advanced PETs, robust AI against new attacks, FL for foundation models/LLMs, standardized benchmarks, and green FLOps for energy efficiency - based on common ML trends, as report text was limited here).</em></li>
+                </ul>
+                 <p class="mt-4 text-sm text-slate-500">The report excerpt primarily highlighted efficiency and scalability. Continued research is vital across all aspects of FLOps to realize FL's full potential.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 py-12 text-center">
+        <p>&copy; 2024 FLOps Interactive Report. Content derived from research on Federated Learning Operations.</p>
+        <p class="text-xs mt-1">This is a conceptual SPA for information exploration.</p>
+    </footer>
+
+    <div id="platform-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden invisible" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="modal-content bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 transform scale-95 opacity-0">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-2xl font-semibold text-sky-700">Platform Details</h3>
+                <button id="close-modal-button" class="text-slate-500 hover:text-slate-700 text-2xl">&times;</button>
+            </div>
+            <div id="modal-body" class="text-slate-700 leading-relaxed">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+            
+            // Smooth scrolling and active link highlighting for nav links
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section[id]');
+            
+            function changeActiveLink() {
+                let index = sections.length;
+                while(--index && window.scrollY + 100 < sections[index].offsetTop) {}
+                navLinks.forEach((link) => link.classList.remove('active'));
+                
+                // Highlight link in main nav
+                const activeMainLink = document.querySelector(`.hidden.md\\:flex .nav-link[href="#${sections[index].id}"]`);
+                if (activeMainLink) activeMainLink.classList.add('active');
+
+                // Highlight link in mobile nav
+                const activeMobileLink = document.querySelector(`#mobile-menu .nav-link[href="#${sections[index].id}"]`);
+                if (activeMobileLink) activeMobileLink.classList.add('active');
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // For mobile menu, close it after click
+                    if (mobileMenu && !mobileMenu.classList.contains('hidden') && link.closest('#mobile-menu')) {
+                         mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            window.addEventListener('scroll', changeActiveLink);
+            changeActiveLink(); // Initial call
+
+            // FLOps Lifecycle Data
+            const lifecycleStages = [
+                { name: "FL System Design & Setup", details: "Define topology, roles, data partitioning, security protocols. Setup client/server infrastructure." },
+                { name: "Federated Data Preparation & Management", details: "Ensure data quality, consistency, preprocessing across distributed sources. Handle non-IID data, manage access securely." },
+                { name: "Federated Model Development & Training", details: "Select/develop model, orchestrate training rounds (client selection, model distribution, local training, update collection), secure aggregation, versioning." },
+                { name: "Federated Model Evaluation & Validation", details: "Assess global model performance on distributed client data (accuracy, fairness, robustness, bias)." },
+                { name: "Federated Model Deployment", details: "Deploy global model (central or back to clients for local use/personalization). Consider device heterogeneity." },
+                { name: "Continuous Monitoring & Maintenance", details: "Track global/local model performance, detect drift, manage updates/retraining, ensure system health/security." },
+                { name: "Governance & Iteration", details: "Manage contributions, ensure compliance, track lineage, refine process based on feedback." }
+            ];
+
+            const lifecycleContainer = document.getElementById('flops-lifecycle-container');
+            if (lifecycleContainer) {
+                lifecycleStages.forEach((stage, index) => {
+                    const stageDiv = document.createElement('div');
+                    stageDiv.className = 'flex-1 min-w-[280px] bg-sky-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer accordion-trigger';
+                    stageDiv.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-md font-semibold text-sky-700">${index + 1}. ${stage.name}</h4>
+                            <span class="text-sky-600 text-xl transition-transform duration-300 transform group-hover:rotate-180">&#x25BC;</span>
+                        </div>
+                        <div class="accordion-content mt-2 text-sm text-slate-600">
+                            <p>${stage.details}</p>
+                        </div>
+                    `;
+                    lifecycleContainer.appendChild(stageDiv);
+                });
+            }
+            
+            // Accordion functionality (generic)
+            document.querySelectorAll('.accordion-trigger').forEach(trigger => {
+                trigger.addEventListener('click', function() {
+                    this.classList.toggle('open');
+                    const content = this.querySelector('.accordion-content');
+                    const arrow = this.querySelector('.text-xl');
+                    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                        content.style.maxHeight = '0px';
+                        if(arrow) arrow.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        if(arrow) arrow.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+            
+            // Architecture Tabs
+            const archTabButtons = document.querySelectorAll('#architecture-tabs .tab-button');
+            const archTabContents = document.querySelectorAll('#architecture-content-area .tab-content');
+
+            if (archTabButtons.length > 0) {
+                archTabButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        archTabButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        
+                        const targetTab = button.dataset.tab;
+                        archTabContents.forEach(content => {
+                            if (content.id === `${targetTab}-content`) {
+                                content.classList.remove('hidden');
+                            } else {
+                                content.classList.add('hidden');
+                            }
+                        });
+                    });
+                });
+            }
+
+            // Challenges Accordion Data
+            const challengesData = [
+                { 
+                    title: "Security & Privacy Concerns", 
+                    content: "Data leakage from model updates, model inversion/membership attacks, poisoning attacks (data/model), operational security of FL infrastructure. Mitigations: PETs (DP, HE, SMPC), TEEs, robust aggregation, blockchain."
+                },
+                { 
+                    title: "Communication Overhead & Efficiency", 
+                    content: "Bandwidth/latency issues, large model sizes. Mitigations: Model compression/quantization (FedSZ), update sparsification (DropPEFT), fewer communication rounds, asynchronous training (FedAT), intelligent client selection."
+                },
+                { 
+                    title: "System & Data Heterogeneity", 
+                    content: "System (varying client hardware, network, power) leading to stragglers. Data (Non-IID) causing convergence issues, poor performance for subgroups. Mitigations: Adaptive scheduling, personalized model complexity (HeteroFL, FedMSA), robust aggregation, personalized FL (MOCHA), clustered FL."
+                },
+                {
+                    title: "Ensuring Model Quality & Robustness",
+                    content: "Convergence in heterogeneous settings, fairness across clients/subgroups, concept drift, fault tolerance (stragglers, client dropouts). Mitigations: Advanced optimization, fairness-aware algorithms, continuous monitoring (FLAME), robust client selection."
+                },
+                {
+                    title: "Governance, Traceability & Authentication",
+                    content: "Participant trust, traceability of decisions/training, contribution assessment, regulatory compliance (GDPR, HIPAA), lifecycle management complexity. Mitigations: Strong authentication (FL-APU), provenance tracking (FATE), transparent governance, incentive mechanisms."
+                }
+            ];
+            const challengesAccordionContainer = document.getElementById('challenges-accordion-container');
+            if (challengesAccordionContainer) {
+                 challengesData.forEach(item => {
+                    const accDiv = document.createElement('div');
+                    accDiv.className = 'bg-white rounded-xl shadow-lg mb-4 accordion-trigger';
+                    accDiv.innerHTML = `
+                        <button class="w-full text-left p-4 focus:outline-none">
+                            <div class="flex justify-between items-center">
+                                <h4 class="text-lg font-semibold text-sky-700">${item.title}</h4>
+                                <span class="text-sky-600 text-xl transition-transform duration-300 transform">&#x25BC;</span>
+                            </div>
+                        </button>
+                        <div class="accordion-content px-4 pb-4 text-slate-600 leading-relaxed">
+                            <p>${item.content}</p>
+                        </div>
+                    `;
+                    challengesAccordionContainer.appendChild(accDiv);
+                });
+            }
+            
+            // Challenges Table Data
+            const challengesTableData = [
+                { area: "Security & Privacy", challenge: "Model Update Leakage", mitigation: "Differential Privacy (DP), HE, SMPC, TEEs" },
+                { area: "Security & Privacy", challenge: "Poisoning Attacks", mitigation: "Robust Aggregation Algorithms, Client Verification" },
+                { area: "Communication & Efficiency", challenge: "High Bandwidth/Latency", mitigation: "Model Compression (FedSZ), Sparsification (DropPEFT)" },
+                { area: "Communication & Efficiency", challenge: "Large Model Sizes", mitigation: "Parameter-Efficient Fine-Tuning (PEFT)" },
+                { area: "Heterogeneity", challenge: "System Heterogeneity (Stragglers)", mitigation: "Adaptive Scheduling, Personalized Models (HeteroFL)" },
+                { area: "Heterogeneity", challenge: "Data Heterogeneity (Non-IID)", mitigation: "Robust Aggregation, Personalized FL (MOCHA)" },
+                { area: "Model Quality & Robustness", challenge: "Convergence Issues", mitigation: "Advanced Optimization, Adaptive Learning Rates" },
+                { area: "Model Quality & Robustness", challenge: "Concept Drift", mitigation: "Continuous Monitoring, Adaptive Learning (FLAME)" },
+                { area: "Governance & Compliance", challenge: "Lack of Trust", mitigation: "Transparent Governance, Secure Authentication" },
+                { area: "Governance & Compliance", challenge: "Traceability", mitigation: "Comprehensive Logging, Provenance Tracking (FATE)" }
+            ];
+            const challengesTableBody = document.getElementById('challenges-table-body');
+            if (challengesTableBody) {
+                challengesTableData.forEach(item => {
+                    const row = challengesTableBody.insertRow();
+                    row.innerHTML = `
+                        <td class="px-4 py-3 font-medium text-slate-800">${item.area}</td>
+                        <td class="px-4 py-3 text-slate-600">${item.challenge}</td>
+                        <td class="px-4 py-3 text-slate-600">${item.mitigation}</td>
+                    `;
+                });
+            }
+
+            // Tools & Platforms Data
+            const platformsData = [
+                { id: "tensoropera", name: "TensorOpera AI (FedML)", overview: "Comprehensive generative AI platform with FedML for production FL. Emphasizes zero-code, cross-platform (edge, mobile), security.", features: "MLOps (Octopus, Beehive), orchestration, edge SDKs, model deployment, client monitoring, security (TEE, HE, SMPC, DP), pre-built jobs.", useCases: "Generative AI, cross-platform FL, FedNLP, FedGraphNN, FedCV, FedIoT." },
+                { id: "nvidiaflare", name: "NVIDIA FLARE", overview: "Open-source Python SDK for adapting ML/DL workflows to federated paradigm. Production-scale.", features: "Hierarchical orchestration, job lifecycle mgmt, client monitoring (Prometheus, Grafana), model eval, security (HE, DP, auth), Flower/ExecuTorch integration.", useCases: "Healthcare (COVID-19 prediction), finance, mobile/edge, robust enterprise FL." },
+                { id: "flower", name: "Flower", overview: "User-friendly, versatile open-source FL framework. ML framework-agnostic, platform-independent.", features: "ServerApp/ClientApp orchestration, customizable strategies, simulation engine, upcoming mobile SDKs, PETs support, ecosystem integration (FLARE, Rhino FCP).", useCases: "Research to production, broad ML compatibility, large community projects." },
+                { id: "ibmfl", name: "IBM Federated Learning", overview: "Integrated in watsonx.ai & Cloud Pak for Data. Enterprise FL with focus on privacy & governance.", features: "Watson Pipelines for workflow automation, model mgmt in watsonx.ai, experiment/round monitoring, Watson OpenScale for deployed model monitoring.", useCases: "Enterprise FL in regulated industries, leveraging IBM Cloud Pak for Data ecosystem." },
+                { id: "pysyft", name: "PySyft / PyGrid", overview: "OpenMined's Python library for privacy-preserving ML (FL, SMPC, DP). PyGrid for P2P deployment.", features: "PySyft for privacy, PyGrid for P2P (Domain/Network nodes), data owner control, access rules, HAGrid for deployment.", useCases: "Privacy-first FL, research, decentralized data science, Android FL (KotlinSyft)." },
+                { id: "fate", name: "FATE", overview: "WeBank's open-source industrial-grade FL framework. Supports horizontal/vertical/transfer FL. Strong security (MPC, HE, DP).", features: "FATE-Flow (job lifecycle, DAGs, model registry), KubeFATE (Kubernetes deployment), secure computation, provenance tracking.", useCases: "Industrial cross-silo FL (finance), secure multi-party computation." },
+                { id: "openfl", name: "OpenFL", overview: "Intel's Python-based FL framework (Linux Foundation). Collaborative training on sensitive data. Framework-agnostic.", features: "TaskRunner/Workflow API for orchestration, secure (mTLS, TEEs, DP, SecAgg), Privacy Meter, FL plan config.", useCases: "Scalable FL from simulation to large federations, healthcare (FeTS initiative)." },
+                { id: "cwlflops", name: "CWL-FLOps", overview: "Research-focused approach using Common Workflow Language, Docker, GitHub, cloud tech for automating FL pipelines.", features: "Workflow-based automation, flexible, abstract, reusable FL pipeline definitions.", useCases: "Automating diverse research FL pipelines, promoting reproducibility." }
+            ];
+
+            const toolsPlatformGrid = document.getElementById('tools-platform-grid');
+            const modal = document.getElementById('platform-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const closeModalButton = document.getElementById('close-modal-button');
+
+            if (toolsPlatformGrid && modal && closeModalButton) {
+                platformsData.forEach(platform => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-6 rounded-xl shadow-lg hover:shadow-sky-200 hover:border-sky-500 border-2 border-transparent transition-all duration-300 cursor-pointer flex flex-col justify-between';
+                    card.innerHTML = `
+                        <div>
+                            <h4 class="text-xl font-semibold text-sky-700 mb-2">${platform.name}</h4>
+                            <p class="text-sm text-slate-600 leading-relaxed">${platform.overview}</p>
+                        </div>
+                        <button data-platform-id="${platform.id}" class="mt-4 text-sm text-sky-600 font-semibold hover:text-sky-800 self-start">Learn More &rarr;</button>
+                    `;
+                    card.querySelector('button').addEventListener('click', () => {
+                        modalTitle.textContent = platform.name;
+                        modalBody.innerHTML = `
+                            <h5 class="font-semibold text-lg text-slate-800 mb-1">Key FLOps Features:</h5>
+                            <p class="mb-3 text-sm">${platform.features}</p>
+                            <h5 class="font-semibold text-lg text-slate-800 mb-1">Primary Use Cases/Strengths:</h5>
+                            <p class="text-sm">${platform.useCases}</p>
+                        `;
+                        modal.classList.remove('hidden', 'invisible');
+                        modal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0');
+                        modal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100');
+                    });
+                    toolsPlatformGrid.appendChild(card);
+                });
+
+                closeModalButton.addEventListener('click', () => {
+                    modal.querySelector('.modal-content').classList.add('scale-95', 'opacity-0');
+                    modal.querySelector('.modal-content').classList.remove('scale-100', 'opacity-100');
+                    setTimeout(() => {
+                         modal.classList.add('hidden', 'invisible');
+                    }, 300);
+                });
+                // Close modal on outside click
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        closeModalButton.click();
+                    }
+                });
+            }
+
+            // Use Cases Tabs
+            const useCasesData = {
+                "Cross-Silo": {
+                    title: "Cross-Silo Federated Learning",
+                    content: "Collaboration between a few organizations (silos) with substantial datasets and resources. FLOps manages governance, trust, data mapping, secure aggregation, and auditability. <br><strong>Example:</strong> FederatedForecasts project for energy forecasting by multiple providers.",
+                    icon: "🏢"
+                },
+                "Healthcare": {
+                    title: "Healthcare",
+                    content: "Enables collaborative AI for disease diagnosis, drug discovery, personalized medicine without sharing patient records. FLOps manages secure data access, compliance (HIPAA, GDPR), clinical validation, and deployment. <br><strong>Examples:</strong> Medical image analysis (FeTS for tumor segmentation, COVID-19 diagnosis), TAVR complication prediction, drug discovery (federated protein LLMs). Platforms like NVIDIA FLARE and Flower are used.",
+                    icon: "⚕️"
+                },
+                "Finance": {
+                    title: "Finance",
+                    content: "Financial institutions collaborate on fraud detection, credit risk assessment, AML without compromising customer privacy. FLOps ensures secure computation, regulatory compliance (PCI DSS), and real-time model deployment. <br><strong>Examples:</strong> Real-time fraud detection (Visa, Mastercard), credit scoring, AML systems. NVIDIA FLARE with Duality for secure FL in finance.",
+                    icon: "💰"
+                },
+                "IoT & Edge AI": {
+                    title: "IoT & Edge AI",
+                    content: "Manages on-device training and personalization for massive distributed edge devices (smartphones, sensors, wearables, vehicles). FLOps handles resource constraints, communication optimization, lightweight updates, and intermittent connectivity. <br><strong>Examples:</strong> Smart keyboard prediction (Google Gboard), smart home devices, Industrial IoT (predictive maintenance), autonomous vehicles, FedIoT platform, TensorOpera for mobile/edge SLMs.",
+                    icon: "📱"
+                }
+            };
+            const useCasesTabsButtonsContainer = document.getElementById('usecases-tabs-buttons');
+            const useCasesTabsContentContainer = document.getElementById('usecases-tabs-content');
+
+            if (useCasesTabsButtonsContainer && useCasesTabsContentContainer) {
+                let firstTab = true;
+                for (const key in useCasesData) {
+                    const button = document.createElement('button');
+                    button.className = `tab-button bg-slate-200 text-slate-700 px-4 py-2 rounded-md hover:bg-sky-500 hover:text-white transition ${firstTab ? 'active' : ''}`;
+                    button.dataset.tab = key.toLowerCase().replace(/\s+/g, '-');
+                    button.innerHTML = `${useCasesData[key].icon} ${key}`;
+                    useCasesTabsButtonsContainer.appendChild(button);
+
+                    const contentDiv = document.createElement('div');
+                    contentDiv.id = `${key.toLowerCase().replace(/\s+/g, '-')}-usecase-content`;
+                    contentDiv.className = `tab-content ${firstTab ? '' : 'hidden'}`;
+                    contentDiv.innerHTML = `
+                        <h3 class="text-xl font-semibold text-sky-700 mb-3">${useCasesData[key].title}</h3>
+                        <p class="text-slate-600 leading-relaxed">${useCasesData[key].content}</p>
+                    `;
+                    useCasesTabsContentContainer.appendChild(contentDiv);
+                    firstTab = false;
+                }
+
+                useCasesTabsButtonsContainer.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        useCasesTabsButtonsContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        
+                        const targetTab = button.dataset.tab;
+                        useCasesTabsContentContainer.querySelectorAll('.tab-content').forEach(content => {
+                            if (content.id === `${targetTab}-usecase-content`) {
+                                content.classList.remove('hidden');
+                            } else {
+                                content.classList.add('hidden');
+                            }
+                        });
+                    });
+                });
+            }
+            
+            // Best Practices Accordions
+            const generalPractices = [
+                { title: "Verification & Documentation", details: "Verify data assumptions; document pipelines, sources, models, procedures comprehensively." },
+                { title: "Logging & Version Control", details: "Implement detailed logging (avoid PII); use Git for code, configs, models." },
+                { title: "Pipeline Design Principles", details: "Ensure idempotency; use separate dev/staging/prod environments; use templates and modularity; avoid manual data sources." },
+                { title: "Resilience & Automation", details: "Manage dependencies (Docker); prepare for failures (retries); use CI/CD; set up alerting; externalize configurations." },
+                { title: "Optimization & Security", details: "Optimize file sizes for transfer; use claim check pattern for large data; manage secrets securely." },
+                { title: "Testing & Quality Assurance", details: "Test data quality (client-side if possible); unit/integration test pipeline code; simulate locally before distributed deployment." }
+            ];
+            const flSpecificPractices = [
+                { title: "Automatic Pruning & Sparsification", details: "Integrate model pruning (server-side) or sparse training (SparsyFed) to reduce computation and communication." },
+                { title: "Automated Pipelines for LLM Fine-tuning", details: "Use specialized pipelines (e.g., FedPipe) for LLMs: identify important weights, quantize, dynamic rank/batch selection, partial aggregation." },
+                { title: "Robust Management of Heterogeneity", details: "Design for system and data heterogeneity: adaptive client selection, variable local model complexity (HeteroFL), robust aggregation." },
+                { title: "Security & Privacy by Design", details: "Embed security/privacy from outset: secure authentication, encrypted communication, secure aggregation, PETs, consider blockchain for trust." },
+                { title: "Continuous Monitoring & Adaptation for FL", details: "Monitor global model performance, fairness, concept drift (FLAME); implement feedback loops for automated responses (retraining, strategy adjustment)." },
+                { title: "Standardized Workflow Descriptions", details: "Use languages like CWL (CWL-FLOps) for portability, reusability, and scalability of FL pipelines." }
+            ];
+
+            function populateAccordionList(containerId, items) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'border border-slate-200 rounded-lg overflow-hidden accordion-trigger';
+                    li.innerHTML = `
+                        <button class="w-full text-left p-3 bg-slate-50 hover:bg-slate-100 focus:outline-none">
+                            <div class="flex justify-between items-center">
+                                <h5 class="font-medium text-slate-700">${item.title}</h5>
+                                <span class="text-sky-600 text-lg transition-transform duration-300 transform">&#x25BC;</span>
+                            </div>
+                        </button>
+                        <div class="accordion-content p-3 text-sm text-slate-600 leading-relaxed">
+                            <p>${item.details}</p>
+                        </div>
+                    `;
+                    container.appendChild(li);
+                });
+            }
+
+            populateAccordionList('general-best-practices-list', generalPractices);
+            populateAccordionList('fl-specific-practices-list', flSpecificPractices);
+            
+            // Re-apply accordion listeners for dynamically added items
+            document.querySelectorAll('.accordion-trigger').forEach(trigger => {
+                const button = trigger.querySelector('button') || trigger; // If trigger is the button itself
+                const content = trigger.querySelector('.accordion-content');
+                const arrow = trigger.querySelector('.text-lg, .text-xl');
+
+                button.addEventListener('click', function(e) {
+                    // Prevent nested accordions from toggling parents if the click is on the button itself
+                    if (e.target !== button && !button.contains(e.target)) return;
+
+                    trigger.classList.toggle('open');
+                    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                        content.style.maxHeight = '0px';
+                        if(arrow) arrow.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        if(arrow) arrow.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+        }); // End DOMContentLoaded
+    </script>
+</body>
+</html>
